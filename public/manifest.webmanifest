@@ -1,0 +1,19 @@
+{
+  "name": "Jivhaalaa · जिव्हाळा",
+  "short_name": "Jivhaalaa",
+  "description": "Feel close, even when apart.",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffaf7",
+  "theme_color": "#5b3f69",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

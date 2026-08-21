@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "envelopes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
