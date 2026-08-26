@@ -1,12 +1,7 @@
-const CACHE = 'jivhaalaa-shell-v2'
+const CACHE = 'jivhaalaa-shell-v1'
 const shell = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg']
 self.addEventListener('install', (event) =>
-  event.waitUntil(
-    caches
-      .open(CACHE)
-      .then((cache) => cache.addAll(shell))
-      .then(() => self.skipWaiting()),
-  ),
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(shell))),
 )
 self.addEventListener('activate', (event) =>
   event.waitUntil(
@@ -25,9 +20,8 @@ self.addEventListener('fetch', (event) => {
     fetch(request)
       .then((response) => {
         if (
-          response.ok &&
-          (request.destination === 'document' ||
-            ['script', 'style', 'image', 'font'].includes(request.destination))
+          request.destination === 'document' ||
+          ['script', 'style', 'image', 'font'].includes(request.destination)
         ) {
           const copy = response.clone()
           caches.open(CACHE).then((cache) => cache.put(request, copy))
