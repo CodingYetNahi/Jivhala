@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
 import { savePrivateRecord } from '../crypto/vault'
 import { emotionalContent } from '../i18n/emotionalContent'
+import { useAuth } from '../auth/AuthProvider'
 export function Feelings({ paired }: { paired: boolean }) {
   const { t, locale } = useI18n()
+  const { user } = useAuth()
   const { emotions, needs } = emotionalContent[locale]
   const [emotion, setEmotion] = useState('')
   const [need, setNeed] = useState('')
@@ -11,7 +13,14 @@ export function Feelings({ paired }: { paired: boolean }) {
   const [saved, setSaved] = useState(false)
   const submit = async () => {
     if (!paired) return
-    await savePrivateRecord('emotion', { emotion, need, note, intensity: 3, createdAt: Date.now() })
+    if (!user) return
+    await savePrivateRecord(user.uid, 'emotion', {
+      emotion,
+      need,
+      note,
+      intensity: 3,
+      createdAt: Date.now(),
+    })
     setSaved(true)
     setNote('')
   }

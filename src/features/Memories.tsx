@@ -2,17 +2,19 @@ import { useEffect, useState } from 'react'
 import { decryptPrivateRecord, savePrivateRecord } from '../crypto/vault'
 import { listVault } from '../data/localRepository'
 import { useI18n } from '../i18n/I18nProvider'
+import { useAuth } from '../auth/AuthProvider'
 type Memory = { text: string; createdAt: number }
 export function Memories() {
   const { t, locale } = useI18n()
+  const { user } = useAuth()
   const [text, setText] = useState('')
   const [memories, setMemories] = useState<(Memory & { id: string })[]>([])
   const load = () =>
-    void listVault('memory').then(async (items) =>
+    void listVault(user!.uid, 'memory').then(async (items) =>
       setMemories(
         await Promise.all(
           items.map(async (item) => ({
-            ...(await decryptPrivateRecord<Memory>(item)),
+            ...(await decryptPrivateRecord<Memory>(user!.uid, item)),
             id: item.id,
           })),
         ),
@@ -21,7 +23,7 @@ export function Memories() {
   useEffect(load, [])
   const save = async () => {
     if (!text.trim()) return
-    await savePrivateRecord('memory', { text: text.trim(), createdAt: Date.now() })
+    await savePrivateRecord(user!.uid, 'memory', { text: text.trim(), createdAt: Date.now() })
     setText('')
     load()
   }

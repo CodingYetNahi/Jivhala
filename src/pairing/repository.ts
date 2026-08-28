@@ -75,8 +75,8 @@ export async function redeemInvitation(uid: string, code: string) {
       tx.get(inviteRef),
       tx.get(doc(service.db, 'users', uid)),
     ])
-    const lockedUntil = security.data()?.lockedUntil?.toMillis?.() ?? 0
-    if (lockedUntil > Date.now()) throw new Error('pairing-locked')
+    const lockedAt = security.data()?.lockedAt?.toMillis?.() ?? 0
+    if (lockedAt + 86400000 > Date.now()) throw new Error('pairing-locked')
     const data = invite.data()
     const valid =
       invite.exists() &&
@@ -90,7 +90,9 @@ export async function redeemInvitation(uid: string, code: string) {
         securityRef,
         {
           failedAttempts: count,
-          lockedUntil: count >= 3 ? new Date(Date.now() + 86400000) : null,
+          // A server transform makes the beginning of the lock independent of
+          // the device clock. The 24-hour deadline is derived when it is read.
+          lockedAt: count >= 3 ? serverTimestamp() : null,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
@@ -120,7 +122,7 @@ export async function redeemInvitation(uid: string, code: string) {
     )
     tx.set(
       securityRef,
-      { failedAttempts: 0, lockedUntil: null, updatedAt: serverTimestamp() },
+      { failedAttempts: 0, lockedAt: null, updatedAt: serverTimestamp() },
       { merge: true },
     )
     return relationshipRef.id
@@ -186,10 +188,14 @@ export async function deleteUserProfile(uid: string) {
 }
 export async function ensureUserProfile(uid: string) {
   const service = getFirebase()
-  if (service)
-    await setDoc(
-      doc(service.db, 'users', uid),
-      { activeRelationshipId: null, activeInvitationHash: null, updatedAt: serverTimestamp() },
-      { merge: true },
-    )
+  if (!service) return
+  const userRef = doc(service.db, 'users', uid)
+  await runTransaction(service.db, async (tx) => {
+    if ((await tx.get(userRef)).exists()) return
+    tx.set(userRef, {
+      activeRelationshipId: null,
+      activeInvitationHash: null,
+      updatedAt: serverTimestamp(),
+    })
+  })
 }
