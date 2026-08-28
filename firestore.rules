@@ -44,8 +44,8 @@ service cloud.firestore {
     }
     match /pairingSecurity/{uid} {
       allow read: if isSelf(uid);
-      allow create: if isSelf(uid) && exact(['failedAttempts','lockedUntil','updatedAt']) && request.resource.data.failedAttempts in [0,1] && request.resource.data.lockedUntil == null && request.resource.data.updatedAt == request.time;
-      allow update: if isSelf(uid) && exact(['failedAttempts','lockedUntil','updatedAt']) && request.resource.data.updatedAt == request.time && ((request.resource.data.failedAttempts == resource.data.failedAttempts + 1 && (request.resource.data.lockedUntil == resource.data.lockedUntil || (request.resource.data.failedAttempts >= 3 && request.resource.data.lockedUntil >= request.time + duration.value(24,'h')))) || (request.resource.data.failedAttempts == 0 && request.resource.data.lockedUntil == null && (resource.data.lockedUntil == null || resource.data.lockedUntil <= request.time)));
+      allow create: if isSelf(uid) && exact(['failedAttempts','lockedAt','updatedAt']) && request.resource.data.failedAttempts in [0,1] && request.resource.data.lockedAt == null && request.resource.data.updatedAt == request.time;
+      allow update: if isSelf(uid) && exact(['failedAttempts','lockedAt','updatedAt']) && request.resource.data.updatedAt == request.time && ((request.resource.data.failedAttempts == resource.data.failedAttempts + 1 && (request.resource.data.lockedAt == resource.data.lockedAt || (request.resource.data.failedAttempts >= 3 && request.resource.data.lockedAt == request.time))) || (request.resource.data.failedAttempts == 0 && request.resource.data.lockedAt == null && (resource.data.lockedAt == null || resource.data.lockedAt <= request.time - duration.value(24,'h'))));
       allow delete: if false;
     }
     match /{document=**} { allow read, write: if false; }

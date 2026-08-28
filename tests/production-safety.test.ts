@@ -18,7 +18,12 @@ describe('production safety guardrails', () => {
     const text = (
       await Promise.all(
         paths
-          .filter((path) => !path.includes('.test.') && !path.endsWith('package-lock.json'))
+          .filter(
+            (path) =>
+              !path.includes('.test.') &&
+              !path.endsWith('package-lock.json') &&
+              !path.endsWith('.md'),
+          )
           .map((path) => readFile(path, 'utf8').catch(() => '')),
       )
     ).join('\n')

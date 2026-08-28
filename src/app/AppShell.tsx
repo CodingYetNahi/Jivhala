@@ -25,10 +25,15 @@ export function AppShell() {
     if (!user) return
     void relationshipFor(user.uid)
       .then(setRelationshipId)
+      .catch(() => setRelationshipId(null))
       .finally(() => setLoading(false))
   }
   useEffect(() => {
-    if (user) void ensureUserProfile(user.uid).then(refresh)
+    if (!user) return
+    // Profile creation is best-effort. Local features must remain available
+    // while Firestore is offline, so it must not gate relationship discovery.
+    void ensureUserProfile(user.uid).catch(() => undefined)
+    refresh()
   }, [user])
   if (loading)
     return (
