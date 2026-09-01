@@ -21,7 +21,8 @@ export function Us({
   }
   const deleteLocal = async () => {
     if (confirm(t('deleteConfirm'))) {
-      await clearPrivateData()
+      if (!auth.user) return
+      await clearPrivateData(auth.user.uid)
       location.reload()
     }
   }
